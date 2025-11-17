@@ -1,12 +1,18 @@
-import { Router } from "express"
-import { getAllCars, getCarById, createCar, updateCar, deleteCar } from "../controllers/carController.js"
+import express from "express"
+import { logMiddleware } from "../middleware/logger.js"
+import * as carController from "../controllers/carController.js"
 
-const router = Router()
+// Create a router instance
+const router = express.Router()
 
-router.get("/", getAllCars)
-router.get("/:id", getCarById)
-router.post("/", createCar)
-router.patch("/:id", updateCar)
-router.delete("/:id", deleteCar)
+// Define routes - notice we use router instead of app
+// The base path will be added when we mount this router in index.js
 
+router.get("/", logMiddleware, carController.getAllCars) // GET /cars
+router.get("/:id", carController.getCarById) // GET /cars/:id
+router.post("/", carController.createCar) // POST /cars
+router.put("/:id", carController.updateCar) // PUT /Cars/:id
+router.delete("/:id", carController.deleteCar) // DELETE /cars/:id
+
+// Export the router
 export default router

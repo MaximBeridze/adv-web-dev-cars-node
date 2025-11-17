@@ -1,32 +1,71 @@
-import { db } from "../config/database.js"
+import Car from '../models/Car.js'
 
-export const getAllCars = async () => {
-	return await db.all("SELECT * FROM cars")
+// Get all cars
+export const getAllCars = () => {
+	return Car.findAll()
 }
 
-export const getCarById = async (id) => {
-	return await db.get("SELECT * FROM cars WHERE id = ?", [id])
+// Get car by ID
+export const getCarById = (id) => {
+	return Car.findById(id)
 }
 
-export const createCar = async (carData) => {
+// Create new car
+export const createCar = (carData) => {
 	const { make, model, year, color, price } = carData
-	const result = await db.run(
-		"INSERT INTO cars (make, model, year, color, price) VALUES (?, ?, ?, ?, ?)",
-		[make, model, year, color, price]
-	)
-	return { id: result.lastID, ...carData }
+	
+	// Business logic: Check if model already exists
+	if (model && Car.modelExists(model)) {
+		throw new Error('Car model already exists')
+	}
+	
+	return Car.create({ make, model, year, color, price })
 }
 
-export const updateCar = async (id, carData) => {
+// Update car
+export const updateCar = (id, carData) => {
 	const { make, model, year, color, price } = carData
-	await db.run(
-		"UPDATE cars SET make = ?, model = ?, year = ?, color = ?, price = ? WHERE id = ?",
-		[make, model, year, color, price, id]
-	)
-	return getCarById(id)
+	
+	// Check if car exists
+	const existingCar = Car.findById(id)
+	if (!existingCar) {
+		return null
+	}
+	
+	// Business logic: Check if new email conflicts
+	if (model && model !== existingCar.model && Car.modelExists(model, id)) {
+		throw new Error('Car model already exists')
+	}
+	
+	return Car.update(id, { make, model, year, color, price })
 }
 
-export const deleteCar = async (id) => {
-	const result = await db.run("DELETE FROM cars WHERE id = ?", [id])
-	return result.changes > 0
+// Delete car
+export const deleteCar = (id) => {
+	return Car.delete(id)
+}
+
+// Additional service methods with business logic
+export const getCarByMake = (make) => {
+	return Car.findByMake(make)
+}
+
+export const getCarByModel = (model) => {
+	return Car.findByModel(model)
+}
+
+export const getCarByYear = (year) => {
+	return Car.findByYear(year)
+}
+
+export const getCarByColor = (color) => {
+	return Car.findByColor(color)
+}
+
+export const getCarByPrice = (price) => {
+	return Car.findByPrice(price)
+}
+
+export const getCarCount = () => {
+	return Car.count()
 }
