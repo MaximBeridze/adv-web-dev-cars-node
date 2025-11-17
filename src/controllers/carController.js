@@ -53,7 +53,7 @@ export const createCar = (req, res) => {
 		res.status(201).json(newCar)
 	} catch (error) {
 		// Handle duplicate email error
-		if (error.message === 'Email already exists') {
+		if (error.message === 'Car model already exists') {
 			return res.status(409).json({ message: error.message })
 		}
 		res.status(500).json({ message: error.message })
